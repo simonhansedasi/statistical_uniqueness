@@ -1,0 +1,63 @@
+# Your profile — edit these values and run: python main.py
+# Valid values for each field are documented in comments
+
+meta:
+  name: "Simon"
+  age: 33              # your current age (used to set cohort)
+  sex: "male"          # male | female
+
+demographics:
+  # white_non_hispanic | black_non_hispanic | hispanic | asian | aian | other
+  race_ethnicity: "white_non_hispanic"
+
+  # less_than_hs | hs_diploma | some_college | bachelors | masters | professional | doctorate
+  education_level: "masters"
+
+  # SOC major group — see occupations listed in engine/probability.py
+  # management | business_financial | computer_math | architecture_engineering
+  # life_physical_social_science | community_social_service | legal
+  # education_library | arts_design_entertainment | healthcare_practitioners
+  # healthcare_support | protective_service | food_preparation | building_grounds
+  # personal_care | sales | office_admin | farming_fishing | construction
+  # installation_maintenance | production | transportation
+  occupation_group: "life_physical_social_science"
+
+  # approximate annual household income in USD
+  household_income: 75000
+
+  state: "WA"
+
+  # list any non-English languages you speak; leave empty [] if English only
+  languages:
+    - "estonian"
+
+family:
+  # never_married | married | divorced | widowed
+  marital_status: "married"
+
+  num_children: 1
+
+  # own | rent
+  housing_tenure: "rent"
+
+life_path:
+  # your age when you first got married; null if never married
+  age_at_first_marriage: 29
+
+  # your age when your first child was born; null if no children
+  age_at_first_child: 31
+
+  # true if you are self-employed, run a business, or have an LLC
+  founded_business: true
+
+  # true if you have lived in 2 or more US states
+  moved_states: true
+
+  # true if you have lived outside the US for 1+ year
+  lived_abroad: true
+
+  # true if you were born outside the US
+  foreign_born: false
+
+  # true if you completed any graduate degree
+  attended_grad_school: true

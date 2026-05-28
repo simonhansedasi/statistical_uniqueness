@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistical Uniqueness</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Statistical Uniqueness</h1>
+  <p>How rare is your combination of attributes compared to your age cohort?</p>
+</header>
+
+<div class="layout">
+
+  <!-- ── LEFT: Controls ──────────────────────────────────────────────────── -->
+  <div class="controls">
+
+    <!-- Identity (always included) -->
+    <div class="card">
+      <h2>Identity</h2>
+      <div class="identity-grid">
+        <div class="field">
+          <label>Age</label>
+          <input type="number" id="age" min="18" max="90" placeholder="Age">
+        </div>
+        <div class="field">
+          <label>Sex</label>
+          <select id="sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column: 1 / -1">
+          <label>Compare against</label>
+          <select id="state-select">
+            <option value="us">United States (national)</option>
+            {% for abbr, name in state_opts %}
+            <option value="{{ abbr }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demographics -->
+    <div class="card" data-section="demographics">
+      <h2>Demographics <span class="section-toggle" onclick="toggleSection(this)">select all</span></h2>
+
+      <div class="attr-row excluded" data-key="race_ethnicity">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Race / Ethnicity</label>
+          <select class="attr-input" id="race_ethnicity">
+            {% for val, label in dropdown_opts.race_ethnicity %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="education_level">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Education Level</label>
+          <select class="attr-input" id="education_level">
+            {% for val, label in dropdown_opts.education_level %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="occupation_group">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Occupation Group</label>
+          <select class="attr-input" id="occupation_group">
+            {% for val, label in dropdown_opts.occupation_group %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="household_income">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Household Income ($)</label>
+          <input type="number" class="attr-input" id="household_income" min="0" step="5000" placeholder="e.g. 75000">
+        </div>
+      </div>
+    </div>
+
+    <!-- Family -->
+    <div class="card" data-section="family">
+      <h2>Family <span class="section-toggle" onclick="toggleSection(this)">select all</span></h2>
+
+      <div class="attr-row excluded" data-key="marital_status">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Marital Status</label>
+          <select class="attr-input" id="marital_status">
+            {% for val, label in dropdown_opts.marital_status %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="num_children">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Number of Children</label>
+          <input type="number" class="attr-input" id="num_children" min="0" max="10" placeholder="0">
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="housing_tenure">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Housing</label>
+          <select class="attr-input" id="housing_tenure">
+            {% for val, label in dropdown_opts.housing_tenure %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="card">
+      <h2>Languages</h2>
+      <div class="lang-section" id="lang-section">
+        <div class="lang-header">
+          <input type="checkbox" id="languages_include" checked>
+          <label for="languages_include">Include non-English languages</label>
+        </div>
+        <div class="lang-chips" id="lang-chips"></div>
+        <div class="lang-add">
+          <select id="lang-picker">
+            <option value="">— add language —</option>
+            {% for lang in known_languages %}
+            <option value="{{ lang }}">{{ lang.replace('_', ' ').title() }}</option>
+            {% endfor %}
+          </select>
+          <button type="button" onclick="addLanguage()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Life Path -->
+    <div class="card" data-section="lifepath">
+      <h2>Life Path <span class="section-toggle" onclick="toggleSection(this)">select all</span></h2>
+
+      <div class="attr-row excluded" data-key="age_at_first_marriage">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Age at first marriage</label>
+          <input type="number" class="attr-input" id="age_at_first_marriage" min="15" max="80" placeholder="e.g. 28">
+        </div>
+      </div>
+
+      <div class="attr-row excluded" data-key="age_at_first_child">
+        <input type="checkbox" class="inc-toggle">
+        <div class="right">
+          <label>Age at first child</label>
+          <input type="number" class="attr-input" id="age_at_first_child" min="15" max="70" placeholder="e.g. 30">
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="bool-rows">
+        {% for bool_key, bool_label in boolean_attrs %}
+        <div class="bool-row" data-key="{{ bool_key }}">
+          <span class="bool-label">{{ bool_label }}</span>
+          <div class="btn-group">
+            <button type="button" class="bool-btn" data-val="true">Yes</button>
+            <button type="button" class="bool-btn" data-val="false">No</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div><!-- /controls -->
+
+  <!-- ── RIGHT: Results ──────────────────────────────────────────────────── -->
+  <div class="results">
+
+    <div class="score-card">
+      <div class="one-in-n" id="one-in-n">—</div>
+      <div class="score-sub" id="score-sub">calculating...</div>
+      <div class="cohort-info" id="cohort-info"></div>
+    </div>
+
+    <div id="error-msg"></div>
+
+    <div class="card">
+      <h2>Attribute Rarity</h2>
+      <table class="attr-table">
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Your value</th>
+            <th class="prob-bar-cell">Rate in cohort</th>
+          </tr>
+        </thead>
+        <tbody id="attr-tbody">
+          <tr><td colspan="3" style="color:#95a5a6;padding:12px 8px">Calculating...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Cumulative Uniqueness <span style="font-weight:400;text-transform:none;letter-spacing:0">(rarest first — matches narrow as attributes are added)</span></h2>
+      <table class="cum-table">
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+            <th>P(attr)</th>
+            <th style="text-align:right">Cohort matches ↓</th>
+          </tr>
+        </thead>
+        <tbody id="cum-tbody">
+          <tr><td colspan="4" style="color:#95a5a6;padding:12px 8px">Calculating...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note-text">
+      <strong>Reading the table:</strong> Each row shows how many people in your cohort would share
+      all the attributes listed so far. Numbers decrease as more filters are added — that's the point.
+      When you reach &lt;1, your combination is statistically unique in the cohort.<br><br>
+      <strong>"No" values count too:</strong> Saying "no" to something uses P(not X) = 1 − rate.
+      Common "no" answers (e.g. 87% don't attend grad school) barely change uniqueness — a rare
+      "no" (e.g. not a veteran when 55% of your cohort is) would matter more.<br><br>
+      <strong>Independence assumed</strong> between attributes — correlated pairs (education × occupation,
+      education × grad school) inflate uniqueness. Life-path timing rates are conditional on the
+      outcome having occurred.
+    </div>
+
+  </div><!-- /results -->
+
+</div><!-- /layout -->
+
+<script>
+
+// ── Language chip state ───────────────────────────────────────────────────────
+var selectedLangs = [];
+
+function addLanguage() {
+  var picker = document.getElementById('lang-picker');
+  var val = picker.value;
+  if (!val || selectedLangs.indexOf(val) >= 0) return;
+  selectedLangs.push(val);
+  renderLangChips();
+  picker.value = '';
+  schedule();
+}
+
+function removeLang(lang) {
+  selectedLangs = selectedLangs.filter(function(l) { return l !== lang; });
+  renderLangChips();
+  schedule();
+}
+
+function renderLangChips() {
+  var container = document.getElementById('lang-chips');
+  container.innerHTML = '';
+  selectedLangs.forEach(function(lang) {
+    var chip = document.createElement('div');
+    chip.className = 'lang-chip';
+    chip.innerHTML = '<span>' + lang.replace(/_/g, ' ') + '</span>';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'x';
+    btn.onclick = function() { removeLang(lang); };
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  });
+}
+
+// ── Section select all / clear ────────────────────────────────────────────────
+function toggleSection(spanEl) {
+  var card = spanEl.closest('.card');
+  var rows = card.querySelectorAll('.attr-row');
+  var allChecked = Array.from(rows).every(function(r) { return r.querySelector('.inc-toggle').checked; });
+  rows.forEach(function(row) {
+    var cb = row.querySelector('.inc-toggle');
+    cb.checked = !allChecked;
+    row.classList.toggle('excluded', allChecked);
+  });
+  // For life path card also clear/set all bool buttons
+  card.querySelectorAll('.bool-btn.active-yes, .bool-btn.active-no').forEach(function(b) {
+    if (allChecked) b.classList.remove('active-yes', 'active-no');
+  });
+  spanEl.textContent = allChecked ? 'select all' : 'clear all';
+  schedule();
+}
+
+// ── Boolean toggles (click active button again to deselect) ──────────────────
+document.querySelectorAll('.btn-group').forEach(function(group) {
+  group.querySelectorAll('.bool-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var alreadyActive = btn.classList.contains('active-yes') || btn.classList.contains('active-no');
+      group.querySelectorAll('.bool-btn').forEach(function(b) {
+        b.classList.remove('active-yes', 'active-no');
+      });
+      if (!alreadyActive) {
+        var val = btn.getAttribute('data-val');
+        if (val === 'true')  btn.classList.add('active-yes');
+        if (val === 'false') btn.classList.add('active-no');
+      }
+      schedule();
+    });
+  });
+});
+
+// ── Include toggles (attr rows) ───────────────────────────────────────────────
+document.querySelectorAll('.attr-row').forEach(function(row) {
+  var cb = row.querySelector('.inc-toggle');
+  if (cb) {
+    cb.addEventListener('change', function() {
+      row.classList.toggle('excluded', !cb.checked);
+      schedule();
+    });
+  }
+});
+
+document.getElementById('languages_include').addEventListener('change', function() {
+  var section = document.getElementById('lang-section');
+  section.classList.toggle('excluded', !this.checked);
+  schedule();
+});
+
+// ── Collect form data ─────────────────────────────────────────────────────────
+function collectData() {
+  var data = {
+    age:   parseInt(document.getElementById('age').value) || 30,
+    sex:   document.getElementById('sex').value,
+    state: document.getElementById('state-select').value,
+  };
+
+  // Categorical + numeric attrs
+  document.querySelectorAll('.attr-row[data-key]').forEach(function(row) {
+    var key = row.getAttribute('data-key');
+    var cb  = row.querySelector('.inc-toggle');
+    var inp = row.querySelector('.attr-input');
+    data[key + '_include'] = cb ? cb.checked : true;
+    data[key] = inp ? inp.value : null;
+  });
+
+  // Boolean attrs
+  document.querySelectorAll('.bool-row[data-key]').forEach(function(row) {
+    var key    = row.getAttribute('data-key');
+    var active = row.querySelector('.bool-btn.active-yes, .bool-btn.active-no');
+    if (!active) {
+      data[key] = null;
+      data[key + '_include'] = false;
+    } else {
+      data[key] = active.getAttribute('data-val') === 'true';
+      data[key + '_include'] = true;
+    }
+  });
+
+  // Languages
+  data['languages'] = selectedLangs;
+  data['languages_include'] = document.getElementById('languages_include').checked;
+
+  return data;
+}
+
+// ── Formatting helpers ────────────────────────────────────────────────────────
+function fmtProb(p) {
+  if (p >= 0.10) return (p * 100).toFixed(1) + '%';
+  if (p >= 0.001) return (p * 100).toFixed(2) + '%';
+  return '1 in ' + Math.round(1 / p).toLocaleString();
+}
+
+function rarityClass(p) {
+  if (p >= 0.20) return 'r-common';
+  if (p >= 0.05) return 'r-uncommon';
+  if (p >= 0.01) return 'r-notable';
+  if (p >= 0.001) return 'r-rare';
+  return 'r-ultra';
+}
+
+function barWidth(p) {
+  // log scale: 100% → 120px, 0.001% → ~20px
+  var logW = Math.max(0, (Math.log10(Math.max(p, 1e-7)) + 7) / 7);
+  return Math.round(logW * 110) + 'px';
+}
+
+// ── Update results DOM ────────────────────────────────────────────────────────
+function updateResults(resp) {
+  if (!resp.ok) {
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').textContent = 'Error: ' + resp.error;
+    return;
+  }
+  document.getElementById('error-msg').style.display = 'none';
+
+  // Score
+  var n = resp.one_in_n;
+  var US_POP = 334000000;
+  if (n <= 0) {
+    document.getElementById('one-in-n').textContent = 'Unique';
+    document.getElementById('score-sub').textContent = 'Expected matches in cohort: ' + resp.expected_matches_fmt;
+  } else if (n > US_POP) {
+    var loc = resp.cohort_label.split(' ')[0];
+    document.getElementById('one-in-n').textContent = 'Statistically unique in ' + loc;
+    document.getElementById('score-sub').textContent =
+      'Expected matches in cohort: ' + resp.expected_matches_fmt +
+      '  ·  probability: 1 in ' + (n >= 1e9 ? (n/1e9).toFixed(1) + 'B' : (n/1e6).toFixed(0) + 'M');
+  } else {
+    document.getElementById('one-in-n').textContent = '1 in ' + n.toLocaleString();
+    document.getElementById('score-sub').textContent = 'Expected matches in cohort: ' + resp.expected_matches_fmt;
+  }
+  document.getElementById('cohort-info').textContent =
+    resp.cohort_label + '  (' + resp.cohort_size.toLocaleString() + ' people)';
+
+  // Attribute rarity table
+  var tbody = document.getElementById('attr-tbody');
+  if (!resp.attributes || resp.attributes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#95a5a6;padding:12px 8px">No attributes included.</td></tr>';
+  } else {
+    tbody.innerHTML = resp.attributes.map(function(a) {
+      var cls  = rarityClass(a.prob);
+      var bw   = barWidth(a.prob);
+      var ptxt = fmtProb(a.prob);
+      return '<tr>' +
+        '<td class="' + cls + '">' + a.name + '</td>' +
+        '<td style="color:#7f8c8d">' + a.value + '</td>' +
+        '<td class="prob-bar-cell">' +
+          '<div class="prob-bar-wrap ' + cls + '">' +
+            '<div class="prob-bar" style="width:' + bw + '"></div>' +
+            '<span class="prob-text">' + ptxt + '</span>' +
+          '</div>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // Cumulative table
+  var ctbody = document.getElementById('cum-tbody');
+  if (!resp.cumulative || resp.cumulative.length === 0) {
+    ctbody.innerHTML = '<tr><td colspan="4" style="color:#95a5a6;padding:12px 8px">No attributes included.</td></tr>';
+  } else {
+    ctbody.innerHTML = resp.cumulative.map(function(e) {
+      return '<tr>' +
+        '<td class="attr-col">' + e.name + '</td>' +
+        '<td class="val-col">' + e.value + '</td>' +
+        '<td>' + fmtProb(e.prob) + '</td>' +
+        '<td class="exp-col">' + e.expected_fmt + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+}
+
+// ── Debounced calculate ───────────────────────────────────────────────────────
+var _timer = null;
+function schedule() {
+  clearTimeout(_timer);
+  _timer = setTimeout(doCalc, 400);
+}
+
+function doCalc() {
+  fetch('/calculate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(collectData()),
+  })
+  .then(function(r) { return r.json(); })
+  .then(updateResults)
+  .catch(function(err) {
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').textContent = 'Request failed: ' + err;
+  });
+}
+
+// ── Wire up all change listeners ──────────────────────────────────────────────
+document.querySelectorAll('input:not([type=checkbox]):not([type=button]), select').forEach(function(el) {
+  el.addEventListener('change', schedule);
+  if (el.type === 'number' || el.type === 'text') {
+    el.addEventListener('input', schedule);
+  }
+});
+
+doCalc();
+</script>
+
+</body>
+</html>

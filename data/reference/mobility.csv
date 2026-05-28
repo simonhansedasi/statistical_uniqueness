@@ -1,0 +1,12 @@
+# Source: ACS 2022, Table B07001 — Geographic Mobility in the Past Year
+# moved_states: fraction who moved from a different state in the past year
+# lived_abroad: cumulative lifetime estimate (not ACS year-over-year; ~10% of US adults)
+# Note: lived_abroad is a rough estimate from expat/survey research; ACS captures only 1-yr movers
+age_group,moved_states_rate,lived_abroad_rate
+20_24,0.059,0.060
+25_29,0.048,0.085
+30_34,0.035,0.100
+35_39,0.028,0.105
+40_44,0.022,0.105
+45_49,0.018,0.100
+50_54,0.016,0.095

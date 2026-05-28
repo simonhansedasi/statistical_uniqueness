@@ -1,0 +1,15 @@
+# Source: NSFG 2017-2019 Key Statistics, Table 14
+# Conditional distribution: P(first married in age_bin | ever married, sex)
+age_bin,sex,prob
+under_20,male,0.04
+20_24,male,0.20
+25_29,male,0.35
+30_34,male,0.24
+35_39,male,0.11
+40_plus,male,0.06
+under_20,female,0.09
+20_24,female,0.29
+25_29,female,0.31
+30_34,female,0.18
+35_39,female,0.09
+40_plus,female,0.04

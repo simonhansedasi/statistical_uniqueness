@@ -1,0 +1,15 @@
+# Source: ACS 2022 B21001 — Veteran Status by Sex by Age
+# P(veteran | age_group, sex)
+age_group,sex,rate
+25_29,male,0.030
+30_34,male,0.055
+35_39,male,0.070
+40_44,male,0.090
+45_49,male,0.110
+50_54,male,0.130
+25_29,female,0.010
+30_34,female,0.018
+35_39,female,0.022
+40_44,female,0.026
+45_49,female,0.030
+50_54,female,0.035

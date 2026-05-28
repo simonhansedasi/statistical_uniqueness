@@ -1,0 +1,15 @@
+# Source: BLS Current Population Survey, 2022 annual averages
+# Self-employment (incorporated + unincorporated) as fraction of employed population
+age_group,sex,rate
+25_29,male,0.071
+30_34,male,0.089
+35_39,male,0.110
+40_44,male,0.124
+45_49,male,0.133
+50_54,male,0.139
+25_29,female,0.051
+30_34,female,0.065
+35_39,female,0.079
+40_44,female,0.090
+45_49,female,0.097
+50_54,female,0.103
